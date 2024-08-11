@@ -4,8 +4,8 @@ Vector2 update_control(void)
 {
 	Vector2 result;
 
-	result.x = IsKeyPressed(KEY_D) - IsKeyPressed(KEY_A);
-	result.y = IsKeyPressed(KEY_S) - IsKeyPressed(KEY_W);
+	result.x = (float)(IsKeyDown(KEY_D) - IsKeyDown(KEY_A)); //A is +x, D is -x
+	result.y = (float)(IsKeyDown(KEY_S) - IsKeyDown(KEY_W)); //S is +z, W is -z
 
 	if(Vector2Length(result) > 1.0f)
 		result = Vector2Normalize(result);
@@ -15,30 +15,37 @@ Vector2 update_control(void)
 
 void control_actor(actor_t* a)
 {
+	/* gutted quake movement??? */
 	float delta_time = GetFrameTime();
-	Vector2 dir = Vector2Scale(update_control(), MAX_SPEED);
-	Vector2 accel_dir = { 0.0f, 0.0f };
-	float dot = -(Vector2DotProduct(a->vel, dir));
-	dot = dot + 1.0f;
-	
-	if(!Vector2Equals(dir, Vector2Zero())) {
-		
-		if(dot > 1.0f)
-			dot = 1.0f;
+	Vector2 intended_dir = update_control();
+	float accel_speed = 0;
+	float deaccel_speed = 0;
+	float target_speed = Vector2Length(intended_dir) * MAX_SPEED;//ranges from [0, MAX_SPEED]
+	float current_speed = Vector2DotProduct(a->vel, intended_dir);//ranges from [-vel,vel]
+	float move_speed = Vector2Length(a->vel);
 
-		accel_dir = Vector2Scale(update_control(), MAX_ACCEL*dot);
-	
-	} else if(Vector2Equals(a->vel, Vector2Zero())) { 
-	
-		return;
+	float add_speed = target_speed - current_speed;
 
-	} else {
+	accel_speed = MAX_ACCEL * delta_time * target_speed;
+	if(accel_speed > add_speed)
+		accel_speed = add_speed;
 
-		accel_dir = Vector2Negate(Vector2Scale(Vector2Normalize(a->vel), FRICTION));
+	if(move_speed > 0.01f) { //are you moving?
 	
-	}	
-		a->vel = Vector2Add(a->vel, Vector2Scale(accel_dir, delta_time));
-		a->pos = Vector2Add(a->pos, Vector2Scale(a->vel, delta_time));
+		deaccel_speed = move_speed - delta_time * move_speed * FRICTION;
+	
+		if(deaccel_speed < 0)
+			deaccel_speed = 0;
+		deaccel_speed /= move_speed;
+
+	} else if(!target_speed) { //check for no input
+		a->vel = Vector2Zero();
+		return;//safe to stop character
+	}
+
+	a->vel = Vector2Scale(a->vel, deaccel_speed); 
+	a->vel = Vector2Add(Vector2Scale(intended_dir, accel_speed), a->vel);
+	a->pos = Vector2Add(Vector2Scale(a->vel, delta_time), a->pos);
 
 	return;
 }

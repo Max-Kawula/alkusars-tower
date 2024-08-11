@@ -4,9 +4,9 @@
 #include "raylib.h"
 #include "raymath.h"
 
-#define MAX_SPEED (1.50f) //meters per second
-#define MAX_ACCEL (2.50f) //meters per second squared
-#define FRICTION (0.98f)
+#define MAX_SPEED (3.50f) //meters per second
+#define MAX_ACCEL (5.00f) //meters per second squared
+#define FRICTION (9.00f) //there is a basis in math, this is coefficient * g
 
 typedef struct actor_t {
 
