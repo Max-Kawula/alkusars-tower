@@ -1,0 +1,15 @@
+# Ignore build directory
+bin/
+build/
+
+# Ignore build objects
+*.o
+*.d
+
+# Ignore input files
+*.bsp
+
+# anything else i don't want
+*.old
+assets/
+tags
