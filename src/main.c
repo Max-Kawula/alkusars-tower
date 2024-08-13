@@ -15,8 +15,13 @@ int main(void)
 	InitWindow(screenWidth, screenHeight, "raylib - bsp parse");
 	/* LOAD THINGS */
 
-	actor_t player = { 0 };
-	player.sprite = LoadTexture("assets/sprites/bumb.png");
+	Actor player = { 0 };
+	// MANUALLY LOADING SPRITE DATA
+	player.sprite.pixel_offset[0] = 16;
+	player.sprite.pixel_offset[1] = 16;
+	player.sprite.size = (Vector2){ 2.0f, 2.0f };
+	player.sprite.num_sprites = 6;
+	player.sprite.tex = LoadTexture("assets/sprites/dumbsheet.png");
 	
 	Camera camera = { 0 };
 	camera.position = (Vector3){ 0.0f, 4.0f, 5.0f };    // Camera position
@@ -42,7 +47,7 @@ int main(void)
 			BeginMode3D(camera);
 				
 				DrawGrid(10, 1);
-				DrawBillboard(camera, player.sprite, (Vector3){player.pos.x,1.0f,player.pos.y}, 2.0f, WHITE);
+				draw_actor(player, camera);	
 
 			EndMode3D();
 
@@ -50,6 +55,6 @@ int main(void)
 
 	}
 
-	UnloadTexture(player.sprite);
+	UnloadTexture(player.sprite.tex);
 	return 0;
 }
